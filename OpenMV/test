@@ -1,0 +1,53 @@
+# Untitled - By: balakirskiyav.24 - Сб дек 3 2022
+
+import sensor, image, time, pyb
+from image import SEARCH_EX, SEARCH_DS
+from pyb import Timer
+from machine import Pin
+
+threshold_black = (0, 77)
+kp = 2.5
+kd = 10
+errOld = 0
+
+sensor.reset()
+sensor.set_contrast(1)                     # Reset and initialize the sensor.
+sensor.set_gainceiling(16)
+sensor.set_pixformat(sensor.GRAYSCALE) # Set pixel format to RGB565 (or GRAYSCALE)
+sensor.set_framesize(sensor.QQVGA)   # Set frame size to QVGA (320x240)
+sensor.skip_frames(time = 2000)     # Wait for settings take effect.
+clock = time.clock()                # Create a clock object to track the FPS.
+
+timer = pyb.Timer(4, freq=1000)
+left = timer.channel(1, pyb.Timer.PWM, pin = pyb.Pin("P7"))
+right = timer.channel(2, pyb.Timer.PWM, pin = pyb.Pin("P8"))
+
+while(True):
+    clock.tick()                    # Update the FPS clock.
+    img = sensor.snapshot()
+
+    maxiUp = 0
+    upBlob = []
+    for yb in img.find_blobs([threshold_black], pixel_threshold = 200, merge = True, margin = 300, roi = (0, 0, img.width(), int(0.5 * img.height()))):
+        if yb.pixels() > maxiUp:
+            maxiUp = yb.pixels()
+            upBlob = yb
+
+    maxiDown = 0
+    downBlob = []
+    for yb in img.find_blobs([threshold_black], pixel_threshold = 200, merge = True, margin = 300, roi = (0, int(0.5 * img.height()), img.width(), int(0.5 * img.height()))):
+        if yb.pixels() > maxiDown:
+            maxiDown = yb.pixels()
+            downBlob = yb
+
+    if downBlob != [] and upBlob != []:
+        img.draw_line(upBlob.cx(), upBlob.cy(), downBlob.cx(), downBlob.cy())
+        err = upBlob.cx() - downBlob.cx();
+        p = err * kp
+        d = (err - errOld) * kd
+        u = p + d
+        errOld = err
+
+    left.pulse_width_percent(1)
+    right.pulse_width_percent(0)
+    pyb.delay(3)
