@@ -130,13 +130,11 @@ while(True):
             downRoi = bx, by + int(bh * 2 / 3), bw, int(bh/3)
             vertRoi = bx + int(bw / 3), by, int(bw/3), bh
 
-            img.draw_rectangle(bx + int(bw / 3), by, int(bw / 3), bh, color = (50, 50, 50), thicness = 3)
-            img.draw_rectangle(bx, by + int(bh / 3), bw, int(bh / 3), color = (50, 50, 50), thicness = 3)
+            img.draw_rectangle(bx + int(bw / 3), by, int(bw / 3), bh, color = (50, 50, 50))
+            img.draw_rectangle(bx, by + int(bh / 3), bw, int(bh / 3), color = (50, 50, 50))
 
             # roi = region of interest
 
-            #                     -3 ???     -3     min(img.width(), lBlob.w() + 6)
-            #upRoi = (max(0, blobX), max(blobY, 0), min(lBlob.w(), img.w() - blobX), 25)
             upCount = 0
             for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
                 upCount += 1;
@@ -150,28 +148,28 @@ while(True):
             downCount = 0
             for downBlob in img.find_blobs([threshold_black], roi = downRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
                 downCount += 1
-                img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
+                img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
 
             vertCount = 0
-            for vertBlob in img.find_blobs([threshold_black], roi = downRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
+            for vertBlob in img.find_blobs([threshold_black], roi = vertRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
                 vertCount += 1
-                img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
+                img.draw_rectangle(vertBlob.x(), vertBlob.y(), vertBlob.w(), vertBlob.h(), color = (255, 255, 255))
 
             #determine letter
-            if midCount == 1 and upCount == 1:
+            if midCount == 1 and upCount == 1 and vertCount >= 2:
                 print("S")
                 message = "S"
                 uart.write("S")
                 #state = True
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-            elif midCount == 1 and upCount == 2:
+            elif downCount == 2 and upCount == 2 and vertCount == 1:
                 print("H")
                 message = "H"
                 uart.write("H")
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-            elif midCount == 2 and upCount == 2:
+            elif midCount == 2 and upCount == 2 and vertCount == 1:
                 print("U")
                 message = "U"
                 uart.write("U")
