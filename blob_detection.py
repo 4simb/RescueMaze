@@ -32,10 +32,11 @@ def set_led_off():
     green_led.off()
     blue_led.off()
 
-threshold_black = (15, 0, -128, 127, -128, 127)
-threshold_yellow = (100, 0, -128, 45, 32, 127)
-threshold_green = (0, 100, -128, -11, -128, 127)
-threshold_red = (0, 100, 31, 127, -23, 127)
+threshold_black = (0, 18, -128, 127, 127, -128)
+threshold_yellow = (0, 100, -48, 127, -128, 45)#(100, 0, -128, 45, 32, 127)
+threshold_green = (0, 31, -128, -15, -16, 22)#(0, 100, -128, -15, 10, -128)
+threshold_red = (0, 100, -128, 14, -33, 80)#(0, 100, 31, 127, -23, 127)
+# (42, 72, -18, 6, -18, 13)
 messageOld = " "
 
 sensor.reset()
@@ -52,9 +53,7 @@ while(True):
     #set_led_white()
     clock.tick()                    # Update the FPS clock.
     img = sensor.snapshot()         # Take a picture and return the image.
-    img.replace(img, vflip = True, hmirror = True)
-    #roii = (int(img.width() / 6), 0, int(3 * img.width() / 4), int(5 * img.height() / 6))
-    copies = []
+    #img.replace(img, vflip = True, hmirror = True)
 
     message = " "
     foundColor = False
@@ -125,9 +124,9 @@ while(True):
             #        |                     |
             #  (bx, by + bh) --- (bx + bw, by + bh)
 
-            upRoi = bx, by, bw, int(bh/3)
-            midRoi = bx, by + int(bh * 1 / 3), bw, int(bh/3)
-            downRoi = bx, by + int(bh * 2 / 3), bw, int(bh/3)
+            upRoi = bx, by, bw, int(bh/4)
+            midRoi = bx, by + int(bh * 1 / 4), bw, int(bh/2)
+            downRoi = bx, by + int(bh * 3 / 4), bw, int(bh/4)
             vertRoi = bx + int(bw / 3), by, int(bw/3), bh
 
             img.draw_rectangle(bx + int(bw / 3), by, int(bw / 3), bh, color = (50, 50, 50))
@@ -163,7 +162,7 @@ while(True):
                 #state = True
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-            elif downCount == 2 and upCount == 2 and vertCount == 1:
+            elif midCount == 1 and upCount == 2 and vertCount == 1:
                 print("H")
                 message = "H"
                 uart.write("H")
