@@ -33,9 +33,9 @@ def set_led_off():
     blue_led.off()
 
 threshold_black = (0, 18, -128, 127, 127, -128)
-threshold_yellow = (0, 100, -48, 127, -128, 45)#(100, 0, -128, 45, 32, 127)
-threshold_green = (0, 31, -128, -15, -16, 22)#(0, 100, -128, -15, 10, -128)
-threshold_red = (0, 100, -128, 14, -33, 80)#(0, 100, 31, 127, -23, 127)
+threshold_yellow = (100, 0, -128, 24, 32, 127)#(0, 100, -48, 127, -128, 45)#
+threshold_green = (0, 100, -128, -15, -128, 35)#(0, 31, -128, -15, -16, 22)#
+threshold_red = (0, 100, 24, 127, -128, 127)#(0, 100, -128, 14, -33, 80)#(0, 100, 31, 127, -23, 127)
 # (42, 72, -18, 6, -18, 13)
 messageOld = " "
 
@@ -48,7 +48,6 @@ sensor.skip_frames(time = 2000)     # Wait for settings take effect.
 clock = time.clock()                # Create a clock object to track the FPS.
 uart = UART(3, 115200)
 
-
 while(True):
     #set_led_white()
     clock.tick()                    # Update the FPS clock.
@@ -56,53 +55,53 @@ while(True):
     #img.replace(img, vflip = True, hmirror = True)
 
     message = " "
+
+    colorLetter = " "
     foundColor = False
-    #state = False
-    i = 0
+    trueBlob = False
+    prevBlob = False
 
-    #YELLOW
-    yellowMaxArea = 0
-    for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if yellowBlob.area() > yellowMaxArea:
-            yellowMaxArea = yellowBlob.area()
-            blobTrue = yellowBlob
+    #COLOR START
 
-    if yellowMaxArea != 0:
-        img.draw_rectangle(blobTrue.x(), blobTrue.y(), blobTrue.w(), blobTrue.h(), color = (255, 255, 255))
-        print("Y")
-        uart.write("Y")
-        message = "Y"
-        foundColor = True
-
-    #GREEN
-    greenMaxArea = 0
-    for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if greenBlob.area() > greenMaxArea:
-            greenMaxArea = greenBlob.area()
-            blobTrue = greenBlob
-
-    if greenMaxArea != 0:
-        img.draw_rectangle(blobTrue.x(), blobTrue.y(), blobTrue.w(), blobTrue.h(), color = (255, 255, 255))
-        print("G")
-        uart.write("G")
-        message = "G"
-        foundColor = True
-
-    #RED
-    redMaxArea = 0
     for redBlob in img.find_blobs([threshold_red], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if redBlob.area() > redMaxArea:
-            redMaxArea = redBlob.area()
-            blobTrue = redBlob
-
-    if redMaxArea != 0:
-        img.draw_rectangle(blobTrue.x(), blobTrue.y(), blobTrue.w(), blobTrue.h(), color = (255, 255, 255))
-        print("R")
-        uart.write("R")
-        message = "R"
+        #img.draw_rectangle(redBlob.x(), redBlob.y(), redBlob.w(), redBlob.h(), color = (255, 255, 255))
+        trueBlob = redBlob
         foundColor = True
+        colorLetter = "R"
 
-    if not foundColor:
+    for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
+        #img.draw_rectangle(greenBlob.x(), greenBlob.y(), greenBlob.w(), greenBlob.h(), color = (255, 255, 255))
+        if trueBlob != False:
+            if greenBlob.area() > trueBlob.area():
+                trueBlob = greenBlob
+                foundColor = True
+                colorLetter = "G"
+        else:
+            trueBlob = greenBlob
+            foundColor = True
+            colorLetter = "G"
+
+    for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
+        #img.draw_rectangle(yellowBlob.x(), yellowBlob.y(), yellowBlob.w(), yellowBlob.h(), color = (255, 255, 255))
+        if trueBlob != False:
+            if yellowBlob.area() > trueBlob.area():
+                trueBlob = yellowBlob
+                foundColor = True
+                colorLetter = "Y"
+        else:
+            trueBlob = yellowBlob
+            foundColor = True
+            colorLetter = "Y"
+
+    if foundColor:
+        img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 255, 255))
+        print(colorLetter, trueBlob.x(), trueBlob.y())
+        uart.write(colorLetter)
+        message = colorLetter
+
+    #COLOR EnD
+
+    else:
         for letter in img.find_blobs([threshold_black], pixel_threshold = 2000, area_threshold = 1000, merge = True, margin = 100):#area_threshold = 2000):
             ratio = letter.w()/letter.h()
             if ratio < 0.4 or ratio > 2.5:
@@ -127,7 +126,10 @@ while(True):
             upRoi = bx, by, bw, int(bh/4)
             midRoi = bx, by + int(bh * 1 / 4), bw, int(bh/2)
             downRoi = bx, by + int(bh * 3 / 4), bw, int(bh/4)
+
+            leftRoi = bx, by, bx + int(bw / 3), bh
             vertRoi = bx + int(bw / 3), by, int(bw/3), bh
+            rightRoi = bx + int(bw * 2 / 3), by, bx + bw, bh
 
             img.draw_rectangle(bx + int(bw / 3), by, int(bw / 3), bh, color = (50, 50, 50))
             img.draw_rectangle(bx, by + int(bh / 3), bw, int(bh / 3), color = (50, 50, 50))
@@ -149,26 +151,39 @@ while(True):
                 downCount += 1
                 img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
 
+            leftCount = 0
+            for leftBlob in img.find_blobs([threshold_black], roi = leftRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
+                leftCount += 1
+                img.draw_rectangle(leftBlob.x(), leftBlob.y(), leftBlob.w(), leftBlob.h(), color = (255, 255, 255))
+
             vertCount = 0
             for vertBlob in img.find_blobs([threshold_black], roi = vertRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
                 vertCount += 1
                 img.draw_rectangle(vertBlob.x(), vertBlob.y(), vertBlob.w(), vertBlob.h(), color = (255, 255, 255))
 
+            rightCount = 0
+            for rightBlob in img.find_blobs([threshold_black], roi = rightRoi, area_threshold = 0, pixel_threshold = 0, x_stride = 1, merge = True, margin = 10):
+                rightCount += 1
+                img.draw_rectangle(rightBlob.x(), rightBlob.y(), rightBlob.w(), rightBlob.h(), color = (255, 255, 255))
+
             #determine letter
-            if midCount == 1 and upCount == 1 and vertCount >= 2:
+            #if midCount == 1 and upCount == 1 and vertCount >= 2 and rightCount == 2:
+            if vertCount >= 2 and upCount == 1 and midCount == 1:
                 print("S")
                 message = "S"
                 uart.write("S")
                 #state = True
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-            elif midCount == 1 and upCount == 2 and vertCount == 1:
+            #elif midCount == 1 and upCount == 2 and vertCount == 1:
+            elif leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and midCount == 1 and downCount == 2:
                 print("H")
                 message = "H"
                 uart.write("H")
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-            elif midCount == 2 and upCount == 2 and vertCount == 1:
+            #elif midCount == 2 and upCount == 2 and vertCount == 1:
+            elif leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and downCount == 1:
                 print("U")
                 message = "U"
                 uart.write("U")
