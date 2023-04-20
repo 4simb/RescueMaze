@@ -52,7 +52,7 @@ while(True):
     #set_led_white()
     clock.tick()                    # Update the FPS clock.
     img = sensor.snapshot()         # Take a picture and return the image.
-    #img.replace(img, vflip = True, hmirror = True)
+    img.replace(img, vflip = True, hmirror = True)
 
     message = " "
 
@@ -64,15 +64,11 @@ while(True):
     #COLOR START
 
     for redBlob in img.find_blobs([threshold_red], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if redBlob.w() / redBlob.h() > 3 / 2:
-            continue
         trueBlob = redBlob
         foundColor = True
         colorLetter = "R"
 
     for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if greenBlob.w() / greenBlob.h() > 3 / 2:
-            continue
         if trueBlob != False:
             if greenBlob.area() > trueBlob.area():
                 trueBlob = greenBlob
@@ -84,8 +80,6 @@ while(True):
             colorLetter = "G"
 
     for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        if yellowBlob.w() / yellowBlob.h() > 3 / 2:
-            continue
         if trueBlob != False:
             if yellowBlob.area() > trueBlob.area():
                 trueBlob = yellowBlob
@@ -97,6 +91,8 @@ while(True):
             colorLetter = "Y"
 
     if foundColor:
+        if trueBlob.w() / trueBlob.h() > 2:
+            continue
         img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 255, 255))
         print(colorLetter, trueBlob.x(), trueBlob.y())
         uart.write(colorLetter)
