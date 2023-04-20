@@ -64,13 +64,15 @@ while(True):
     #COLOR START
 
     for redBlob in img.find_blobs([threshold_red], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        #img.draw_rectangle(redBlob.x(), redBlob.y(), redBlob.w(), redBlob.h(), color = (255, 255, 255))
+        if redBlob.w() / redBlob.h() > 3 / 2:
+            continue
         trueBlob = redBlob
         foundColor = True
         colorLetter = "R"
 
     for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        #img.draw_rectangle(greenBlob.x(), greenBlob.y(), greenBlob.w(), greenBlob.h(), color = (255, 255, 255))
+        if greenBlob.w() / greenBlob.h() > 3 / 2:
+            continue
         if trueBlob != False:
             if greenBlob.area() > trueBlob.area():
                 trueBlob = greenBlob
@@ -82,7 +84,8 @@ while(True):
             colorLetter = "G"
 
     for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
-        #img.draw_rectangle(yellowBlob.x(), yellowBlob.y(), yellowBlob.w(), yellowBlob.h(), color = (255, 255, 255))
+        if yellowBlob.w() / yellowBlob.h() > 3 / 2:
+            continue
         if trueBlob != False:
             if yellowBlob.area() > trueBlob.area():
                 trueBlob = yellowBlob
