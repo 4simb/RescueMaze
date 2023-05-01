@@ -32,11 +32,10 @@ def set_led_off():
     green_led.off()
     blue_led.off()
 
-threshold_black = (0, 18, -128, 127, 127, -128)
+threshold_black = (0, 11, -35, 127, -128, 127)#(0, 14, -35, 127, -128, 127)#(0, 18, -128, 127, 127, -128)
 threshold_yellow = (100, 0, -128, 24, 32, 127)#(0, 100, -48, 127, -128, 45)#
 threshold_green = (0, 21, -128, -8, -128, 34)#(0, 100, -128, -15, -128, 35)#(0, 31, -128, -15, -16, 22)#
-threshold_red = (0, 21, 24, 127, 5, 127)#(0, 100, 24, 127, -128, 127)#(0, 100, -128, 14, -33, 80)#(0, 100, 31, 127, -23, 127)
-# (42, 72, -18, 6, -18, 13)
+threshold_red = (0, 21, 24, 127, 5, 127)
 messageOld = " "
 
 sensor.reset()
@@ -103,7 +102,7 @@ while(True):
     else:
         for letter in img.find_blobs([threshold_black], pixel_threshold = 2000, area_threshold = 1000, merge = True, margin = 100):#area_threshold = 2000):
             ratio = letter.w()/letter.h()
-            if ratio < 0.5 or ratio > 2:
+            if ratio < 0.4 or ratio > 2.5:
                 continue
             #if lBlob.w()/lBlob.h() > 0.4 and yb.w()/yb.h() < 2.5:
 
