@@ -33,9 +33,9 @@ def set_led_off():
     blue_led.off()
 
 threshold_black = (0, 11, -35, 127, -128, 127)#(0, 14, -35, 127, -128, 127)#(0, 18, -128, 127, 127, -128)
-threshold_yellow = (100, 0, -128, 24, 32, 127)#(0, 100, -48, 127, -128, 45)#
+threshold_yellow = (19, 100, -128, 24, 39, 127)#(60, 100, -128, 24, 42, 127)#(100, 0, -128, 24, 32, 127)#(0, 100, -48, 127, -128, 45)#
 threshold_green = (0, 21, -128, -8, -128, 34)#(0, 100, -128, -15, -128, 35)#(0, 31, -128, -15, -16, 22)#
-threshold_red = (0, 21, 24, 127, 5, 127)
+threshold_red = (0, 60, 27, 127, 24, 127)#(0, 60, 24, 127, 5, 127)#(0, 21, 24, 127, 5, 127)
 messageOld = " "
 
 sensor.reset()
@@ -92,7 +92,7 @@ while(True):
     if foundColor:
         if trueBlob.w() / trueBlob.h() > 2:
             continue
-        img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 255, 255))
+        img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
         print(colorLetter, trueBlob.x(), trueBlob.y())
         uart.write(colorLetter)
         message = colorLetter
@@ -125,7 +125,7 @@ while(True):
             midRoi = bx, by + int(bh * 1 / 4), bw, int(bh/2)
             downRoi = bx, by + int(bh * 3 / 4), bw, int(bh/4)
 
-            leftRoi = bx, by, bx + int(bw / 3), bh
+            leftRoi = bx, by, int(bw / 3), bh
             vertRoi = bx + int(bw / 3), by, int(bw/3), bh
             rightRoi = bx + int(bw * 2 / 3), by, bx + bw, bh
 
@@ -166,7 +166,15 @@ while(True):
 
             #determine letter
             #if midCount == 1 and upCount == 1 and vertCount >= 2 and rightCount == 2:
-            if vertCount >= 2 and upCount == 1 and midCount == 1:
+            #if vertCount >= 2 and upCount == 1 and midCount == 1:
+            #u: leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and downCount == 1 and midCount == 2
+
+
+            sCondition = (vertCount >= 2 and rightCount >= 2 and leftCount >= 2) or (upCount == 1 and midCount == 2 and downCount == 1)
+            hCondition = leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and midCount == 1 and downCount == 2
+            uCondition = leftCount == 1 and vertCount == 1 and downCount == 1 and midCount == 2 and upCount == 2
+
+            if sCondition:
                 print("S")
                 message = "S"
                 uart.write("S")
@@ -174,14 +182,14 @@ while(True):
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
             #elif midCount == 1 and upCount == 2 and vertCount == 1:
-            elif leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and midCount == 1 and downCount == 2:
+            elif hCondition:
                 print("H")
                 message = "H"
                 uart.write("H")
                 foundLetter = True
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
             #elif midCount == 2 and upCount == 2 and vertCount == 1:
-            elif leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and downCount == 1:
+            elif uCondition:
                 print("U")
                 message = "U"
                 uart.write("U")
