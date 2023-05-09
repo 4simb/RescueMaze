@@ -1,13 +1,14 @@
 import sensor, image, time, pyb
 from image import SEARCH_EX, SEARCH_DS
 from pyb import UART
+import utime
 
 red_led = pyb.LED(1)
 green_led = pyb.LED(2)
 blue_led = pyb.LED(3)
 thresh = 10
 
-def set_led_red():
+def set_led_red(): #not really helpful because leds are too bright
     red_led.on()
     green_led.off()
     blue_led.off()
@@ -22,7 +23,7 @@ def set_led_blue():
     green_led.off()
     blue_led.on()
 
-def set_led_white():
+def set_led_white(): #not useful bc green led is much brighter and generate shadows
     red_led.on()
     green_led.on()
     blue_led.on()
@@ -47,8 +48,12 @@ sensor.skip_frames(time = 2000)     # Wait for settings take effect.
 clock = time.clock()                # Create a clock object to track the FPS.
 uart = UART(3, 115200)
 
+uartAllowed = True
+uartMessage = '0'
+
 while(True):
     clock.tick()
+
     img = sensor.snapshot()
     img.replace(img, vflip = True, hmirror = True)
 
@@ -92,8 +97,9 @@ while(True):
         if trueBlob.w() / trueBlob.h() > 2:
             continue
         img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
-        print(colorLetter, trueBlob.x(), trueBlob.y())
-        uart.write(colorLetter)
+        if uartAllowed:
+            print(colorLetter, trueBlob.x(), trueBlob.y())
+            uart.write(colorLetter)
         message = colorLetter
         #set_led_off()
 
@@ -177,18 +183,43 @@ while(True):
             if recLetter != 0:
                 #set_led_white()
                 foundLetter = True;
-                print(recLetter)
+
                 message = recLetter
-                uart.write(recLetter)
                 img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
+                if uartAllowed:
+                    print(recLetter)
+                    uart.write(recLetter)
 
                 #set_led_off()
 
     if messageOld != " " and message ==  " ":
-        uart.write("0")
         print("0")
+        uart.write("0")
+
+
     messageOld = message
-    #if not(state):
-    #    uart.write("1")
+    # A - forbidden
+    # B - allowed
+
+    if not uartAllowed:
+        set_led_blue()
+    else:
+        set_led_off()
+
     if uart.any():
-        uart.read()
+        uartMessage = uart.read(1)
+        if uartMessage == b'A':
+            uart.read(uart.any())
+            uart.write("0")
+            print("0")
+            print("got 'A'")
+            uartAllowed = False
+        elif uartMessage == b'B':
+            uart.read(uart.any())
+            print("got 'B'")
+            allowTime = utime.ticks_ms()
+
+    if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1500:
+        uartAllowed = True
+
+
