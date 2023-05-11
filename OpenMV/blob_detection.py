@@ -196,7 +196,6 @@ while(True):
         print("0")
         uart.write("0")
 
-
     messageOld = message
     # A - forbidden
     # B - allowed
@@ -210,11 +209,13 @@ while(True):
         uartMessage = uart.read(1)
         if uartMessage == b'A':
             uart.read(uart.any())
-            uart.write("0")
+            uart.writechar(2)
             print("0")
             print("got 'A'")
+
             uartAllowed = False
         elif uartMessage == b'B':
+            uart.writechar(255)
             uart.read(uart.any())
             print("got 'B'")
             allowTime = utime.ticks_ms()
