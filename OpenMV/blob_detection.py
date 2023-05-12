@@ -33,9 +33,10 @@ def set_led_off():
     green_led.off()
     blue_led.off()
 
-threshold_black = (0, 19, -18, 127, -128, 12)#(0, 11, -35, 127, -128, 127)
-threshold_yellow = (19, 100, -128, 24, 39, 127)
-threshold_green = (0, 21, -128, -8, -128, 34)
+#day - 24
+threshold_black = (0, 18, -18, 127, -128, 17)#(0, 11, -35, 127, -128, 127)
+threshold_yellow = (19, 100, -128, 36, 39, 127)
+threshold_green = (0, 49, -128, -8, -128, 47)
 threshold_red = (0, 60, 27, 127, 0, 127)#(0, 60, 27, 127, 24, 127)
 messageOld = " "
 
@@ -65,12 +66,12 @@ while(True):
 
     #COLOR START
 
-    for redBlob in img.find_blobs([threshold_red], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
+    for redBlob in img.find_blobs([threshold_red], merge = True, margin = 10, area_threshold = 4000, pixel_threshold = 40):
         trueBlob = redBlob
         foundColor = True
         colorLetter = "R"
 
-    for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
+    for greenBlob in img.find_blobs([threshold_green], merge = True, margin = 10, area_threshold = 4000, pixel_threshold = 40):
         if trueBlob != False:
             if greenBlob.area() > trueBlob.area():
                 trueBlob = greenBlob
@@ -81,7 +82,7 @@ while(True):
             foundColor = True
             colorLetter = "G"
 
-    for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 700, pixel_threshold = 40):
+    for yellowBlob in img.find_blobs([threshold_yellow], merge = True, margin = 10, area_threshold = 4000, pixel_threshold = 40):
         if trueBlob != False:
             if yellowBlob.area() > trueBlob.area():
                 trueBlob = yellowBlob
@@ -129,7 +130,7 @@ while(True):
             upBlob = 0; midBlob = 0; downBlob = 0; leftBlob = 0; vertBlob = 0; rightBob = 0
             upCount = 0; midCount = 0; downCount = 0; leftCount = 0; vertCount = 0; rightCount = 0
 
-            blobAreaThreshold = 100;
+            blobAreaThreshold = 70;
 
             for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = blobAreaThreshold, pixel_threshold = 200, x_stride = 1, merge = True, margin = 10):
                 upCount += 1;
@@ -220,7 +221,7 @@ while(True):
             print("got 'B'")
             allowTime = utime.ticks_ms()
 
-    if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1500:
+    if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1700:
         uartAllowed = True
 
 
