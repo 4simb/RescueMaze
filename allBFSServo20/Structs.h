@@ -87,7 +87,6 @@ class Vec3b {
     double r;
     double g;
     double b;
-
     Vec3b(double r, double g, double b) {
       this->r = r;
       this->g = g;
@@ -114,9 +113,9 @@ class Vec3b {
       //Vec3b blueColor = Vec3b(-1050, -700, -350);
       //Vec3b whiteColor = Vec3b(1, 0, 0);
 
-      Vec3b blackColor = Vec3b(-12000, -12000, -15000);
-      Vec3b blueColor = Vec3b(-3500, -2250, -1750);
-      Vec3b whiteColor = Vec3b(-1500, -800, -1000);
+      Vec3b blackColor = Vec3b(-20000, -15000, -15000);
+      Vec3b blueColor = Vec3b(-8300, -2250, -1750);
+      Vec3b whiteColor = Vec3b(-1800, -1300, -1500);
 
       const byte silver = 4, black = 3, blue = 2, white = 1;
       //silver - 4
@@ -124,7 +123,7 @@ class Vec3b {
       //blue - 2
       // white - 1
 
-      if(this->r < -8000) return black;
+      if(this->r < -16000) return black;
       else if(this->r + this->g + this->b > -3000) return silver;
       else if(this->cosBetweenColors(blueColor) > this->cosBetweenColors(blackColor)) return blue;
       else return white;
