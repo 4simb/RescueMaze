@@ -131,17 +131,17 @@ while(True):
 
             blobAreaThreshold = 100;
 
-            for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
+            for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 30):
                 upCount += 1;
-                #img.draw_rectangle(upBlob.x(), upBlob.y(), upBlob.w(), upBlob.h(), color = (255, 255, 255))
+                img.draw_rectangle(upBlob.x(), upBlob.y(), upBlob.w(), upBlob.h(), color = (255, 255, 255))
 
             for midBlob in img.find_blobs([threshold_black], roi = midRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
                 midCount += 1;
-                #img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
+                img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
 
-            for downBlob in img.find_blobs([threshold_black], roi = downRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
+            for downBlob in img.find_blobs([threshold_black], roi = downRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 30):
                 downCount += 1
-                #img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
+                img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
 
             for leftBlob in img.find_blobs([threshold_black], roi = leftRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
                 leftCount += 1
@@ -159,7 +159,7 @@ while(True):
             #img.draw_rectangle(bx, by + int(bh / 3), bw, int(bh / 3), color = (0, 200, 200))
 
             #determine letter
-            sCondition = (vertCount >= 2 and rightCount >= 2 and leftCount >= 2) or (upCount == 1 and midCount == 2 and downCount == 1)
+            sCondition = (vertCount >= 2 and rightCount >= 2 and leftCount >= 2) or (upCount == 1 and midCount >= 1 and downCount == 1)
             hCondition = leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and midCount == 1 and downCount == 2
             uCondition = leftCount == 1 and vertCount == 1 and downCount == 1 and midCount == 2 and upCount == 2
 
