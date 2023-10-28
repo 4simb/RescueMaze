@@ -117,9 +117,9 @@ while(True):
             bw = min(img.width() - letter.x(), letter.w())
             bh = min(img.height() - letter.y(), letter.h())
 
-            upRoi = bx, by, bw, int(bh/5)
-            midRoi = bx, by + int(bh * 1 / 5), bw, int(3 * bh/5)
-            downRoi = bx, by + int(bh * 4 / 5), bw, int(bh/5)
+            upRoi = bx, by, bw, int(bh/4)
+            midRoi = bx, by + int(bh * 1 / 4), bw, int(2 * bh/4)
+            downRoi = bx, by + int(bh * 3 / 4), bw, int(bh/4)
 
             leftRoi = bx, by, int(bw / 3), bh
             vertRoi = bx + int(bw / 3), by, int(bw/3), bh
@@ -129,7 +129,7 @@ while(True):
             upBlob = 0; midBlob = 0; downBlob = 0; leftBlob = 0; vertBlob = 0; rightBob = 0
             upCount = 0; midCount = 0; downCount = 0; leftCount = 0; vertCount = 0; rightCount = 0
 
-            blobAreaThreshold = 70;
+            blobAreaThreshold = 100;
 
             for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
                 upCount += 1;
@@ -223,4 +223,3 @@ while(True):
 
     if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1700:
         uartAllowed = True
-
