@@ -48,17 +48,19 @@ def set_led_off():
     blue_led.off()
 
 threshold_black = (0, 4, -128, 127, -9, 127)#(0, 26, -6, 127, -128, 127)#(0, 11, -35, 127, -128, 127)
-threshold_yellow = (31, 62, -56, 36, 28, 86)#(31, 62, -56, 36, 16, 73)#(19, 100, -128, 36, 39, 127)
-threshold_green = (5, 10, 127, -128, -25, 127)#(15, 20, 6, -128, -7, 127)#(0, 24, -18, 127, -128, 127)#(0, 49, -128, -8, -128, 47)
+threshold_yellow = (53, 83, -27, 11, 33, 99)#(31, 62, -56, 36, 28, 86)#(31, 62, -56, 36, 16, 73)#(19, 100, -128, 36, 39, 127)
+threshold_green = (3, 100, -128, -14, 5, 55)#(27, 56, -128, -17, -2, 55)#(5, 10, 127, -128, -25, 127)#(15, 20, 6, -128, -7, 127)#(0, 24, -18, 127, -128, 127)#(0, 49, -128, -8, -128, 47)
 threshold_red = (0, 58, 13, 127, -7, 127)#(0, 60, 27, 127, 0, 127)#(0, 60, 27, 127, 24, 127)
 messageOld = " "
 
 sensor.reset()
 sensor.set_contrast(1)
-sensor.set_gainceiling(16)
-#sensor.set_auto_gain(False)
-#sensor.set_auto_whitebal(False)
-sensor.set_saturation(-3)
+
+
+sensor.set_auto_gain(False)
+sensor.set_auto_whitebal(False)
+
+
 sensor.set_pixformat(sensor.RGB565) #GRAYSCALE) # Set pixel format to RGB565 (or GRAYSCALE)
 sensor.set_framesize(sensor.QVGA)   # Set frame size to QVGA (160x120)
 sensor.skip_frames(time = 3000)     # Wait for settings take effect.
@@ -70,7 +72,14 @@ uartMessage = '0'
 
 while(True):
     clock.tick()
+    #sensor.set_auto_exposure(False, exposure_us = 16000)
 
+    #settings of sensor
+    sensor.set_auto_exposure(False, exposure_us = 16000)
+    #=================
+
+
+    #print("     ", sensor.get_exposure_us())
     img = sensor.snapshot()
     img.replace(img, vflip = True, hmirror = True)
 
@@ -115,7 +124,7 @@ while(True):
         if trueBlob.w() / trueBlob.h() > 2:
             continue
         #========================DRAW_RECTANGLE_FOR_COLORS===============
-        #img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
+        img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
         if uartAllowed:
             print(colorLetter, trueBlob.x(), trueBlob.y())
             uart.write(colorLetter)
@@ -242,7 +251,7 @@ while(True):
 
     #if countGreen > 15 or countRed > 15 or countYellow > 15 or countH > 15 or countS > 15 or countU > 15:
     #    resetCounts()
-    
+
     #if uart.any():
     #    uartMessage = uart.read(1)
     #    if uartMessage == b'A':
