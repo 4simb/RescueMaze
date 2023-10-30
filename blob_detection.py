@@ -7,6 +7,20 @@ red_led = pyb.LED(1)
 green_led = pyb.LED(2)
 blue_led = pyb.LED(3)
 thresh = 10
+#countGreen = 0
+#countRed = 0
+#countYellow = 0
+#countH = 0
+#countS = 0
+#countU = 0
+
+#def resetCounts():
+#    countGreen = 0
+#    countRed = 0
+#    countYellow = 0
+#    countH = 0
+#    countS = 0
+#    countU = 0
 
 def set_led_red(): #not really helpful because leds are too bright
     red_led.on()
@@ -33,7 +47,7 @@ def set_led_off():
     green_led.off()
     blue_led.off()
 
-threshold_black = (0, 4, -128, 127, -128, 127)#(0, 26, -6, 127, -128, 127)#(0, 11, -35, 127, -128, 127)
+threshold_black = (0, 4, -128, 127, -9, 127)#(0, 26, -6, 127, -128, 127)#(0, 11, -35, 127, -128, 127)
 threshold_yellow = (31, 62, -56, 36, 28, 86)#(31, 62, -56, 36, 16, 73)#(19, 100, -128, 36, 39, 127)
 threshold_green = (5, 10, 127, -128, -25, 127)#(15, 20, 6, -128, -7, 127)#(0, 24, -18, 127, -128, 127)#(0, 49, -128, -8, -128, 47)
 threshold_red = (0, 58, 13, 127, -7, 127)#(0, 60, 27, 127, 0, 127)#(0, 60, 27, 127, 24, 127)
@@ -42,9 +56,12 @@ messageOld = " "
 sensor.reset()
 sensor.set_contrast(1)
 sensor.set_gainceiling(16)
+#sensor.set_auto_gain(False)
+#sensor.set_auto_whitebal(False)
+sensor.set_saturation(-3)
 sensor.set_pixformat(sensor.RGB565) #GRAYSCALE) # Set pixel format to RGB565 (or GRAYSCALE)
 sensor.set_framesize(sensor.QVGA)   # Set frame size to QVGA (160x120)
-sensor.skip_frames(time = 2000)     # Wait for settings take effect.
+sensor.skip_frames(time = 3000)     # Wait for settings take effect.
 clock = time.clock()                # Create a clock object to track the FPS.
 uart = UART(3, 115200)
 
@@ -62,6 +79,7 @@ while(True):
     colorLetter = " "
     foundColor = False
     trueBlob = False
+    print(clock.fps())
 
     #COLOR START
 
@@ -96,7 +114,8 @@ while(True):
         #set_led_white()
         if trueBlob.w() / trueBlob.h() > 2:
             continue
-        img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
+        #========================DRAW_RECTANGLE_FOR_COLORS===============
+        #img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
         if uartAllowed:
             print(colorLetter, trueBlob.x(), trueBlob.y())
             uart.write(colorLetter)
@@ -108,7 +127,7 @@ while(True):
     else: #no color found
         for letter in img.find_blobs([threshold_black], pixel_threshold = 2000, area_threshold = 1000, merge = True, margin = 100):#area_threshold = 2000):
             ratio = letter.w()/letter.h()
-            if ratio < 0.4 or ratio > 2.5:
+            if ratio < 0.5 or ratio > 2:
                 continue
 
             # true blob sizes
@@ -133,15 +152,15 @@ while(True):
 
             for upBlob in img.find_blobs([threshold_black], roi = upRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 30):
                 upCount += 1;
-                img.draw_rectangle(upBlob.x(), upBlob.y(), upBlob.w(), upBlob.h(), color = (255, 255, 255))
+                #img.draw_rectangle(upBlob.x(), upBlob.y(), upBlob.w(), upBlob.h(), color = (255, 255, 255))
 
             for midBlob in img.find_blobs([threshold_black], roi = midRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
                 midCount += 1;
-                img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
+                #img.draw_rectangle(midBlob.x(), midBlob.y(), midBlob.w(), midBlob.h(), color = (255, 255, 255))
 
             for downBlob in img.find_blobs([threshold_black], roi = downRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 30):
                 downCount += 1
-                img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
+                #img.draw_rectangle(downBlob.x(), downBlob.y(), downBlob.w(), downBlob.h(), color = (255, 255, 255))
 
             for leftBlob in img.find_blobs([threshold_black], roi = leftRoi, area_threshold = blobAreaThreshold, pixel_threshold = 170, x_stride = 1, merge = True, margin = 20):
                 leftCount += 1
@@ -159,9 +178,10 @@ while(True):
             #img.draw_rectangle(bx, by + int(bh / 3), bw, int(bh / 3), color = (0, 200, 200))
 
             #determine letter
-            sCondition = (vertCount >= 2 and rightCount >= 2 and leftCount >= 2) or (upCount == 1 and midCount >= 1 and downCount == 1)
+            sCondition = (vertCount >= 2 and rightCount >= 1 and leftCount >= 1) and (upCount == 1 and midCount >= 1 and downCount == 1)
             hCondition = leftCount == 1 and vertCount == 1 and rightCount == 1 and upCount == 2 and midCount == 1 and downCount == 2
-            uCondition = leftCount == 1 and vertCount == 1 and downCount == 1 and midCount == 2 and upCount == 2
+            uCondition = leftCount == 1 and downCount == 1 and midCount == 2 and upCount == 2
+            #and vertCount == 1
 
             if (leftCount, vertCount, rightCount, upCount, midCount, downCount) == (1, 1, 1, 1, 1, 1):
                 if midBlob.w() / downBlob.w() > 2:
@@ -173,10 +193,10 @@ while(True):
 
             recLetter = 0;
 
-            if sCondition:
-                recLetter = "S"
-            elif hCondition:
+            if hCondition:
                 recLetter = "H"
+            elif sCondition:
+                recLetter = "S"
             elif uCondition:
                 recLetter = "U"
 
@@ -185,10 +205,11 @@ while(True):
                 foundLetter = True;
 
                 message = recLetter
-                img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
-                if uartAllowed:
-                    print(recLetter)
-                    uart.write(recLetter)
+                #========================DRAW_RECTANGLE_FOR_LETTERS===============
+                #img.draw_rectangle(bx, by, bw, bh, color = (0, 0, 255))
+                #if uartAllowed:
+                print(recLetter)
+                uart.write(recLetter)
 
                 #set_led_off()
 
@@ -205,21 +226,37 @@ while(True):
     else:
         set_led_off()
 
+    #if message == "G": countGreen += 1
+    #elif message == "R": countRed += 1
+    #elif message == "Y": countYellow += 1
+    #elif message == "H": countH += 1
+    #elif message == "S": countS += 1
+    #elif message == "U": countU += 1
 
-    if uart.any():
-        uartMessage = uart.read(1)
-        if uartMessage == b'A':
-            uart.read(uart.any())
-            uart.writechar(2)
-            print("0")
-            print("got 'A'")
+    #if message != "G": countGreen = 0
+    #elif message != "R": countRed = 0
+    #elif message != "Y": countYellow = 0
+    #elif message != "H": countH = 0
+    #elif message != "S": countS = 0
+    #elif message != "U": countU = 0
 
-            uartAllowed = False
-        elif uartMessage == b'B':
-            uart.writechar(255)
-            uart.read(uart.any())
-            print("got 'B'")
-            allowTime = utime.ticks_ms()
+    #if countGreen > 15 or countRed > 15 or countYellow > 15 or countH > 15 or countS > 15 or countU > 15:
+    #    resetCounts()
+    
+    #if uart.any():
+    #    uartMessage = uart.read(1)
+    #    if uartMessage == b'A':
+    #        uart.read(uart.any())
+    #        uart.writechar(2)
+    #        print("0")
+    #        print("got 'A'")
 
-    if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1700:
-        uartAllowed = True
+    #        uartAllowed = False
+    #    elif uartMessage == b'B':
+    #        uart.writechar(255)
+    #        uart.read(uart.any())
+    #        print("got 'B'")
+    #        allowTime = utime.ticks_ms()
+
+    #if uartMessage == b'B' and utime.ticks_ms() - allowTime > 1700:
+    #    uartAllowed = True
