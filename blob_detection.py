@@ -48,9 +48,9 @@ def set_led_off():
     blue_led.off()
 
 threshold_black = (0, 4, -128, 127, -9, 127)#(0, 26, -6, 127, -128, 127)#(0, 11, -35, 127, -128, 127)
-threshold_yellow = (53, 83, -27, 11, 33, 99)#(31, 62, -56, 36, 28, 86)#(31, 62, -56, 36, 16, 73)#(19, 100, -128, 36, 39, 127)
+threshold_yellow = (53, 83, -27, 11, 41, 99)#(31, 62, -56, 36, 28, 86)#(31, 62, -56, 36, 16, 73)#(19, 100, -128, 36, 39, 127)
 threshold_green = (3, 10, -128, 20, -15, 55)#(27, 56, -128, -17, -2, 55)#(5, 10, 127, -128, -25, 127)#(15, 20, 6, -128, -7, 127)#(0, 24, -18, 127, -128, 127)#(0, 49, -128, -8, -128, 47)
-threshold_red = (0, 58, 13, 127, -7, 127)#(0, 60, 27, 127, 0, 127)#(0, 60, 27, 127, 24, 127)
+threshold_red = (0, 58, 23, 127, -7, 127)#(0, 60, 27, 127, 0, 127)#(0, 60, 27, 127, 24, 127)
 messageOld = " "
 
 sensor.reset()
@@ -121,7 +121,7 @@ while(True):
 
     if foundColor:
         #set_led_white()
-        if trueBlob.w() / trueBlob.h() > 2:
+        if trueBlob.w() / trueBlob.h() > 2 or trueBlob.h() / trueBlob.w() > 8:
             continue
         #========================DRAW_RECTANGLE_FOR_COLORS===============
         img.draw_rectangle(trueBlob.x(), trueBlob.y(), trueBlob.w(), trueBlob.h(), color = (255, 0, 255))
